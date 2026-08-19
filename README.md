@@ -37,6 +37,13 @@ node chromatic-studies-v2.js        # Series V (studies XXI–XXIII)
 Scripts write SVG + PNG into their working directory. Seeds are fixed in the
 script headers — the output is deterministic.
 
+### Audio pairs
+
+`scripts/audio-pairs/` contains the Dittytoy translations of selected studies
+(sine-wave renderings of the same field formulas — pitch ← y position, pan ← x,
+amplitude ← field magnitude). Paste any of them into dittytoy.net to hear the
+same invisible architecture.
+
 ## Method
 
 - Canvas: 200×200 unit coordinate space (−100 to 100), rendered at 1000×1000
