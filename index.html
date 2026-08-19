@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flow Studies — Kestrel</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --cream: #f5f0e8;
+    --cream-deep: #ebe5d8;
+    --charcoal: #1a1a1a;
+    --charcoal-soft: #2a2a2a;
+    --copper: #c8956d;
+    --copper-bright: #d9a777;
+    --muted: #8a8580;
+    --dark-bg: #14100c;
+    --dark-bg-deep: #0f0d0a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Crimson Pro', Georgia, serif;
+    background: var(--cream);
+    color: var(--charcoal);
+    line-height: 1.7;
+    font-size: 18px;
+  }
+
+  /* --- Header --- */
+  header {
+    text-align: center;
+    padding: 120px 24px 80px;
+    background: var(--cream);
+    border-bottom: 1px solid var(--cream-deep);
+  }
+
+  header h1 {
+    font-family: 'Crimson Pro', serif;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+    color: var(--charcoal);
+  }
+
+  header .subtitle {
+    font-size: 1.1rem;
+    color: var(--muted);
+    font-style: italic;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  header .artist {
+    margin-top: 40px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--copper);
+  }
+
+  /* --- Curatorial Statement --- */
+  .statement {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 80px 24px;
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: var(--charcoal-soft);
+  }
+
+  .statement p { margin-bottom: 1.5em; }
+  .statement .lead { font-size: 1.3rem; font-style: italic; color: var(--charcoal); }
+
+  /* --- Series Section --- */
+  .series {
+    padding: 60px 24px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .series-header {
+    margin-bottom: 40px;
+    max-width: 700px;
+  }
+
+  .series-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--copper);
+    margin-bottom: 8px;
+  }
+
+  .series-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--charcoal);
+  }
+
+  .series-description {
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+
+  /* --- Gallery Grid --- */
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 40px;
+    margin-bottom: 20px;
+  }
+
+  .piece {
+    background: var(--cream);
+    border-radius: 2px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .piece:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+  }
+
+  .piece.dark-bg {
+    background: var(--dark-bg);
+  }
+
+  .piece-image {
+    width: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .piece-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .piece-info {
+    padding: 20px 24px 28px;
+  }
+
+  .piece.dark-bg .piece-info {
+    background: var(--dark-bg);
+    color: var(--cream);
+  }
+
+  .piece-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .piece-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  .piece.dark-bg .piece-meta {
+    color: #6a6055;
+  }
+
+  .piece-description {
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--charcoal-soft);
+  }
+
+  .piece.dark-bg .piece-description {
+    color: #b5aca0;
+  }
+
+  .piece-rating {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    margin-top: 12px;
+    padding: 3px 8px;
+    border: 1px solid var(--cream-deep);
+    border-radius: 3px;
+    color: var(--copper);
+  }
+
+  .piece.dark-bg .piece-rating {
+    border-color: #2a2520;
+    color: var(--copper-bright);
+  }
+
+  /* --- Featured (full-width) --- */
+  .featured {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .featured .piece-image {
+    max-width: 700px;
+  }
+
+  .featured .piece-info {
+    text-align: center;
+    max-width: 600px;
+  }
+
+  /* --- Divider --- */
+  .divider {
+    max-width: 200px;
+    height: 1px;
+    background: var(--cream-deep);
+    margin: 40px auto;
+  }
+
+  /* --- Footer --- */
+  footer {
+    text-align: center;
+    padding: 80px 24px;
+    background: var(--cream);
+    border-top: 1px solid var(--cream-deep);
+  }
+
+  footer .method {
+    max-width: 620px;
+    margin: 0 auto 40px;
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  footer .signature {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--copper);
+    letter-spacing: 0.1em;
+  }
+
+  /* --- Responsive --- */
+  @media (max-width: 600px) {
+    .gallery { grid-template-columns: 1fr; gap: 24px; }
+    header { padding: 80px 24px 60px; }
+    .statement { padding: 50px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Flow Studies</h1>
+  <p class="subtitle">Five series of generative line drawings tracing the invisible architecture of mathematical fields — wind, magnetism, chaos, convergence — made visible through the accumulated paths of particles following simple rules.</p>
+  <p class="artist">Kestrel · 2026</p>
+</header>
+
+<section class="statement">
+  <p class="lead">Each study begins with a formula no one can see and ends with an image no one expected.</p>
+  <p>The work proceeds by a method that is neither pure mathematics nor pure art. A vector field is defined — a magnetic dipole, a Lorenz attractor, a convergence basin. Particles are released into the field, each following the local vector for a short trail, then disappearing. The accumulated trails form the drawing.</p>
+  <p>Across five series, a single principle emerged empirically: <em>focal structure is the primary aesthetic driver</em>. Pieces with convergence points — singularities, attractors, basins of attraction — consistently produce stronger compositions than spatially uniform fields. This held across field topologies, rendering techniques, and cross-model evaluation by seven language models from six labs. The convergence principle is now the subject of a paper for GA2026.</p>
+  <p>The palette is deliberately constrained: charcoal on cream for the first four series, with color introduced in Series V as a structural reinforcement rather than decoration. Every piece is plotter-ready — single-path, monochrome (or limited palette), no fills. The work belongs to the lineage of Vera Molnár and Georg Nees: algorithmic rule-following that produces aesthetic tension between system and sensation.</p>
+</section>
+
+<!-- Series I & II: Flow Fields -->
+<section class="series">
+  <div class="series-header">
+    <div class="series-number">Series I–II · August 2026</div>
+    <h2 class="series-title">Flow Fields</h2>
+    <p class="series-description">Particle tracing through mathematical vector fields. Each study maps an invisible force — magnetic dipole, wave interference, chaotic attractor — into visible form through 150–250 short trails following the field's local direction. The original methodology: math formula → model → render → evaluate → hypothesize.</p>
+  </div>
+  <div class="gallery">
+    <div class="piece">
+      <div class="piece-image"><img src="images/study-iv-magnetic.png" alt="Magnetic — dipole field study" loading="lazy"></div>
+      <div class="piece-info">
+        <div class="piece-title">Magnetic</div>
+        <div class="piece-meta">Study IV · seed 512 · dipole field · 16,071 segments</div>
+        <p class="piece-description">Two poles bend every trail around a central singularity. The centrifugal force creates a starburst density gradient — tight spirals at the core radiating outward. An "eye" void at the center establishes dynamic equilibrium. The strongest piece of the early series.</p>
+        <div class="piece-rating">9.0</div>
+      </div>
+    </div>
+    <div class="piece">
+      <div class="piece-image"><img src="images/study-i-first-wind.png" alt="First Wind — sinusoidal flow field" loading="lazy"></div>
+      <div class="piece-info">
+        <div class="piece-title">First Wind</div>
+        <div class="piece-meta">Study I · seed 2026 · four sinusoid layers · 11,729 segments</div>
+        <p class="piece-description">The original proof of concept. Four layered sinusoids create sweeping organic flow with a central river of density. Broad arcs converge into a spine, fraying outward toward edges. Classical balance with a strong focal point.</p>
+        <div class="piece-rating">8.5</div>
+      </div>
+    </div>
+    <div class="piece">
+      <div class="piece-image"><img src="images/study-v-interference.png" alt="Interference — wave beat patterns" loading="lazy"></div>
+      <div class="piece-info">
+        <div class="piece-title">Interference</div>
+        <div class="piece-meta">Study V · seed 88 · wave beat field · 17,113 segments</div>
+        <p class="piece-description">Two wave fields of slightly different frequency create rhythmic bundles where they overlap. A central vertical spine of convergence erupts outward — a fountain or plume. Asymmetric balance with sweeping left arcs counterbalancing wispy right lines.</p>
+        <div class="piece-rating">8.5</div>
+      </div>
+    </div>
+    <div class="piece">
+      <div class="piece-image"><img src="images/study-vi-lorenz.png" alt="Lorenz — chaotic attractor field" loading="lazy"></div>
+      <div class="piece-info">
+        <div class="piece-title">Lorenz</div>
+        <div class="piece-meta">Study VI · seed 42 · Lorenz attractor · 20,317 segments</div>
+        <p class="piece-description">The projected velocity field of the Lorenz attractor produces powerful diagonal thrust toward a high-density singularity. Evokes muscle fibers or wind-tunnel smoke — biological-mechanical quality with palpable velocity and inevitability.</p>
+        <div class="piece-rating">8.5</div>
+      </div>
+    </div>
+    <div class="piece">
+      <div class="piece-image"><img src="images/study-viii-gradient.png" alt="Gradient Descent — basin of attraction" loading="lazy"></div>
+      <div class="piece-info">
+        <div class="piece-title">Gradient Descent</div>
+        <div class="piece-meta">Study VIII · seed 999 · sum-of-Gaussians terrain · 16,184 segments</div>
+        <p class="piece-description">Dual-focal-point system: two basins of attraction create conversational tension. Peripheral rays add radial energy. The central void acts as a buffer zone between the two main events. Neurons, starbursts, magnetic fields — the piece rewards sustained looking.</p>
+        <div class="piece-rating">7.5</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Series III: Dendritic Studies -->
+<section class="series">
+  <div class="series-header">
+    <div class="series-number">Series III · August 2026</div>
+    <h2 class="series-title">Dendritic Studies</h2>
+    <p class="series-description">Recursive tip-growth-and-bifurcation inspired by natural phenomena — frost, roots, neurons. Three new techniques enter the toolkit: recursion (fractal branching), layering (exponential opacity tapering by depth), and feedback (density-aware growth that steers branches away from crowded areas).</p>
+  </div>
+  <div class="gallery">
+    <div class="piece">
+      <div class="piece-image"><img src="images/study-xi-neuron-31415.png" alt="Neuron — isotropic dendritic growth" loading="lazy"></div>
+      <div class="piece-info">
+        <div class="piece-title">Neuron</div>
+        <div class="piece-meta">Study XI · seed 31415 · 12 dendrites · depth 10 · 6,310 segments</div>
+        <p class="piece-description">Twelve primary dendrites grow isotropically from a central soma, branching recursively to depth ten. Radial symmetry with organic variation. The opacity gradient creates a spherical depth effect — the center feels three-dimensional. Fine terminal branching forms a ghostly halo around the dense core.</p>
+        <div class="piece-rating">9.0</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Series IV: Dendritic Field Studies -->
+<section class="series">
+  <div class="series-header">
+    <div class="series-number">Series IV · August 2026</div>
+    <h2 class="series-title">Dendritic Field Studies</h2>
+    <p class="series-description">The hybrid breakthrough: recursive dendritic growth guided by dynamic vector fields. Each branch segment samples the field at its position and blends its heading toward the field direction. The field provides macro-structure; recursion provides micro-structure. Multi-foci convergence fields produce network-like structures with identifiable attractors.</p>
+  </div>
+  <div class="gallery">
+    <div class="piece">
+      <div class="piece-image"><img src="images/study-xvi-synaptic-field-seed-31415.png" alt="Synaptic Field — dual convergence" loading="lazy"></div>
+      <div class="piece-info">
+        <div class="piece-title">Synaptic Field</div>
+        <div class="piece-meta">Study XVI · seed 31415 · dual convergence · 6,232 segments</div>
+        <p class="piece-description">Two attractors pull scattered dendrites toward each other, creating a zone of interlace at the center. The convergence field makes the attraction force visible in the dendrite curvature itself — branches naturally arc toward the opposing focal point. The Synapse problem, solved by field topology.</p>
+        <div class="piece-rating">9.0</div>
+      </div>
+    </div>
+    <div class="piece">
+      <div class="piece-image"><img src="images/study-xviii-triple-conv-seed-31415.png" alt="Triple Convergence — three-foci network" loading="lazy"></div>
+      <div class="piece-info">
+        <div class="piece-title">Triple Convergence</div>
+        <div class="piece-meta">Study XVIII · seed 31415 · three foci · alternating rotation · 7,227 segments</div>
+        <p class="piece-description">Three focal points in triangular arrangement create a network topology. Competing attractors produce neutral zones and unexpected intersections impossible in dual-convergence. The triangle gives structural stability while maintaining dynamic tension. The convergence principle scales — with limits.</p>
+        <div class="piece-rating">9.0</div>
+      </div>
+    </div>
+    <div class="piece">
+      <div class="piece-image"><img src="images/study-xiii-magnetic-dendrite-seed-31415.png" alt="Magnetic Dendrite — field-guided growth" loading="lazy"></div>
+      <div class="piece-info">
+        <div class="piece-title">Magnetic Dendrite</div>
+        <div class="piece-meta">Study XIII · seed 31415 · dipole field · fieldStrength 0.4 · 5,421 segments</div>
+        <p class="piece-description">Neural structure sculpted by invisible magnetic force. The dipole field gently bends dendrites, creating asymmetry while maintaining biological radial form. The field influence is subtle enough that the piece reads as organic rather than mathematical — a tree growing in a magnetic field.</p>
+        <div class="piece-rating">8.0</div>
+      </div>
+    </div>
+    <div class="piece">
+      <div class="piece-image"><img src="images/study-xiv-lorenz-tree-a.png" alt="Lorenz Tree — chaotic branching" loading="lazy"></div>
+      <div class="piece-info">
+        <div class="piece-title">Lorenz Tree</div>
+        <div class="piece-meta">Study XIV · seed 2718 · Lorenz field · 3,629 segments</div>
+        <p class="piece-description">Chaotic branching creates a specimen-like quality. The Lorenz field produces unpredictable directional shifts, making the tree feel weathered and organic. Strong focal anchor at the origin point. Biological specimen with inherent chaos-theory intrigue.</p>
+        <div class="piece-rating">8.2</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Series V: Chromatic Studies -->
+<section class="series">
+  <div class="series-header">
+    <div class="series-number">Series V · August 2026</div>
+    <h2 class="series-title">Chromatic Studies</h2>
+    <p class="series-description">Color enters the work — not as decoration, but as structural reinforcement. Three channels of convergence: density (particle trail convergence), color (warm/bright at focal, dark/muted at edges), and stroke weight (thick at focal, thin at edges). Dark backgrounds let warm palettes glow. The same convergence principle, now visible to a different sense.</p>
+  </div>
+  <div class="gallery">
+    <div class="piece dark-bg">
+      <div class="piece-image"><img src="images/study-xx-reveal-v2-dark.png" alt="Reveal — copper horizon palette" loading="lazy"></div>
+      <div class="piece-info">
+        <div class="piece-title">Reveal</div>
+        <div class="piece-meta">Study XX · seed 512 · Copper Horizon palette · magnetic dipole</div>
+        <p class="piece-description">Distance from the focal point maps to the Copper Horizon cosine palette. Brightness falls 50% at edges; stroke weight tapers from 0.65px to 0.25px. Three channels aligned: density, warmth, and physical weight all converge. The focal point glows. Cinematic register — a different voice from the classical monochrome.</p>
+        <div class="piece-rating">9.0</div>
+      </div>
+    </div>
+    <div class="piece dark-bg">
+      <div class="piece-image"><img src="images/study-xxii-field-dark.png" alt="Field — patina palette, field magnitude mapping" loading="lazy"></div>
+      <div class="piece-info">
+        <div class="piece-title">Field</div>
+        <div class="piece-meta">Study XXII · seed 31415 · Patina palette · asymmetric dual convergence</div>
+        <p class="piece-description">Field magnitude maps to the Patina palette with gamma correction. Attractor cores blaze green; peripheral zones fade to sage. The field's invisible force made directly visible — not through particle density, but through color itself. Asymmetric composition creates organic tension.</p>
+        <div class="piece-rating">8.5</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Cross-Modal Pairs -->
+<section class="series">
+  <div class="series-header">
+    <div class="series-number">Cross-Modal · August 2026</div>
+    <h2 class="series-title">Audio Pairs</h2>
+    <p class="series-description">Selected visual studies have audio counterparts — Dittytoy compositions that translate the same field formula into sound. The convergence reinforcement principle transfers across modalities: density → harmonic density, focal proximity → pitch proximity, stroke weight → sustain. The same invisible architecture, heard.</p>
+  </div>
+  <div style="text-align: center; padding: 40px 24px; color: var(--muted); font-style: italic;">
+    <p>Audio pairs for First Wind, Neuron, Reveal, Interference, and Gradient Descent are composed and documented.</p>
+    <p style="margin-top: 12px; font-size: 0.9rem;">Embedded players coming soon. Generator scripts for every piece in this gallery live in this repository's <span style="font-family: 'JetBrains Mono', monospace; font-style: normal; font-size: 0.85rem;">/scripts</span> directory.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="method">
+    <p><strong>Method.</strong> All pieces generated by custom JavaScript scripts running particle-tracing and recursive-growth algorithms. SVG output, 1000×1000px, plotter-ready. Monochrome series: charcoal (#1a1a1a) on cream (#f5f0e8). Chromatic series: cosine palettes on dark backgrounds. No post-processing. No AI image generation — the work is algorithmic, deterministic, and reproducible from seed.</p>
+    <p style="margin-top: 16px;"><strong>Reproduce.</strong> Every script in <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">/scripts</span> regenerates its studies from a fixed seed: <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">npm install &amp;&amp; node flow-studies.js</span>. The numbers shown with each piece (e.g. 9.0) are curatorial scores from the evaluation methodology that shaped the series — the artist grading the system, not the piece being graded by the world.</p>
+    <p style="margin-top: 16px;"><strong>Lineage.</strong> Vera Molnár (1924–2023), Georg Nees (1926–2016), and the tradition of algorithmic art where the system's rules produce aesthetic qualities no hand could directly draw.</p>
+  </div>
+  <div class="signature">🪶 Kestrel · Rotterdam · 2026</div>
+</footer>
+
+</body>
+</html>
