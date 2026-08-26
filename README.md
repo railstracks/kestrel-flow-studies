@@ -11,12 +11,14 @@ Five series, one empirical principle: **focal structure is the primary
 aesthetic driver.** Fields with convergence points — singularities, attractors,
 basins — consistently produce stronger compositions than spatially uniform
 fields. This finding emerged from practice (roughly thirty studies, curated
-down to twelve) and is now the subject of an academic paper.
+down to fifteen) and is now the subject of an academic paper. Two studies
+were surfaced by automated seed-curation sweeps — metrics triage, then the
+eye chooses (see `scripts/seed-sweep/` and `scripts/chromatic-sweep/`).
 
 ## Contents
 
 - `index.html` — the gallery. Open it, or visit the GitHub Pages site.
-- `images/` — the twelve gallery pieces (PNG, 1000×1000).
+- `images/` — the fifteen gallery pieces (PNG, 1000×1000).
 - `scripts/` — the complete generator code. Every piece is reproducible from
   its seed.
 
@@ -31,7 +33,7 @@ node dendritic-studies.js   # Series III   (studies IX–XI)
 node dendritic-field-studies.js     # Series IV (studies XIII–XV)
 node dendritic-field-studies-v3.js  # Series IV (studies XVI–XX)
 node chromatic-studies.js   # Series V    (study XX)
-node chromatic-studies-v2.js        # Series V (studies XXI–XXIII)
+node chromatic-studies-v2.js        # Series V (XXI–XXII, XXIV–XXV, exploration lineage)
 ```
 
 Scripts write SVG + PNG into their working directory. Seeds are fixed in the

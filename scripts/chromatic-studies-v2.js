@@ -1,9 +1,16 @@
 // Flow Studies Series V — Chromatic Studies (Full Set)
-// Studies XXI–XXIII: Three structural-to-chromatic mappings with identity palettes
+// Studies XXI–XXV: structural-to-chromatic mappings with identity palettes
 //
 // Study XXI "Journey" — Lorenz attractor + Fog & Whiskey (position along trail → color)
 // Study XXII "Field" — Dual convergence + Patina (field magnitude → color)
-// Study XXIII "Growth" — Dendritic recursion + Inkwell (recursion depth → color)
+// Study XXIV "Wildling" — Dendritic recursion + Inkwell (recursion depth → color, seed 2)
+// Study XXV "Bramble" — Same family, seed 34 — the tension twin
+//
+// Released pair surfaced by the second seed-curation sweep (60 seeds, Growth
+// family): scripts/chromatic-sweep/. The explored incumbent (seed 31415) fell
+// to third in the eye rounds — "specimen vs art" — and is kept below as
+// exploration lineage. (No Study XXIII here: that number belongs to Triple
+// Collision, released from the first sweep.)
 //
 // Design doc: SERIES-V-COLOR-DESIGN.md
 // First color experiment validated: Study XX "Reveal" (9/10 on dark background)
@@ -472,13 +479,15 @@ console.log('\n━━━ Study XXII "Field" — Dual Convergence + Patina ━━
 }
 
 // ═══════════════════════════════════════════════════════════════
-// STUDY XXIII — "Growth"
+// STUDY XXIV "Wildling" & STUDY XXV "Bramble"
 // Dendritic recursive growth + Inkwell palette
 // Mapping: recursion depth → color
 // Per-segment coloring: trunk is deep indigo, twigs are silver-blue
+// Released as an adjacent pair: Wildling breathes (negative space
+// penetrates the form), Bramble grips (mass pulls inward, knotted).
 // ═══════════════════════════════════════════════════════════════
 
-console.log('\n━━━ Study XXIII "Growth" — Dendritic + Inkwell ━━━');
+console.log('\n━━━ Studies XXIV "Wildling" + XXV "Bramble" — Dendritic + Inkwell ━━━');
 
 {
     const params = {
@@ -496,10 +505,6 @@ console.log('\n━━━ Study XXIII "Growth" — Dendritic + Inkwell ━━━'
         densityAvoidance: 0.6,
     };
 
-    // 12 primary dendrites radiating from center (matching Neuron topology)
-    const segments = dendriticGrowthRadial(31415, params, 12);
-    console.log(`  Grew ${segments.length} dendritic segments (max depth ${params.maxDepth})`);
-
     // Normalize depth to t (0 = trunk, 1 = terminal twig)
     const maxDepth = params.maxDepth;
     const colorFn = (seg) => {
@@ -508,15 +513,32 @@ console.log('\n━━━ Study XXIII "Growth" — Dendritic + Inkwell ━━━'
         return { color: c, t };
     };
 
-    // Deep blue-grey — lighter than before so trunk is visible
-    const stats = generatePerSegmentSVG(segments, colorFn, '#10121c',
-        'study-xxiii-growth-dark.svg', {
-            strokeMin: 0.12,
-            strokeMax: 0.6,
-            opacityBase: 0.75,
-            title: 'Study XXIII Growth'
-        });
-    console.log(`  Generated ${stats.segments} colored segments → study-xxiii-growth-dark.svg`);
+    // Released pair (second seed-curation sweep, Aug 2026)
+    for (const [seed, name, num] of [[2, 'Wildling', 'xxiv'], [34, 'Bramble', 'xxv']]) {
+        const segs = dendriticGrowthRadial(seed, params, 12);
+        console.log(`  ${name}: grew ${segs.length} segments (seed ${seed})`);
+        generatePerSegmentSVG(segs, colorFn, '#10121c',
+            `study-${num}-${name.toLowerCase()}.svg`, {
+                strokeMin: 0.12,
+                strokeMax: 0.6,
+                opacityBase: 0.75,
+                title: `Study ${num.toUpperCase()} ${name}`
+            });
+        console.log(`    → study-${num}-${name.toLowerCase()}.svg`);
+    }
+
+    // Exploration lineage: the manual incumbent (fell 3rd in eye rounds)
+    {
+        const segments = dendriticGrowthRadial(31415, params, 12);
+        const stats = generatePerSegmentSVG(segments, colorFn, '#10121c',
+            'growth-exploration-31415-incumbent.svg', {
+                strokeMin: 0.12,
+                strokeMax: 0.6,
+                opacityBase: 0.75,
+                title: 'Growth exploration — incumbent 31415'
+            });
+        console.log(`  Exploration: ${stats.segments} segments (31415) → growth-exploration-31415-incumbent.svg`);
+    }
 
     // --- Neural Grove: multiple overlapping neurons filling the canvas ---
     console.log('\n  Generating Neural Grove (multi-neuron)...');
@@ -542,21 +564,21 @@ console.log('\n━━━ Study XXIII "Growth" — Dendritic + Inkwell ━━━'
         return { color: c, t };
     };
     generatePerSegmentSVG(groveSegments, groveColorFn, '#10121c',
-        'study-xxiii-grove-dark.svg', {
+        'growth-exploration-neural-grove.svg', {
             strokeMin: 0.1,
             strokeMax: 0.55,
             opacityBase: 0.6,
-            title: 'Study XXIII Neural Grove'
+            title: 'Growth exploration — neural grove'
         });
-    console.log(`    → study-xxiii-grove-dark.svg`);
+    console.log(`    → growth-exploration-neural-grove.svg`);
 
-    // Also generate seed variants for the best study
+    // Exploration seed variants (manual five, pre-sweep)
     console.log('\n  Generating seed variants...');
     const seeds = [999, 42, 818, 16180];
     for (const seed of seeds) {
         const segs = dendriticGrowthRadial(seed, params, 12);
         generatePerSegmentSVG(segs, colorFn, '#10121c',
-            `study-xxiii-growth-seed-${seed}.svg`, {
+            `growth-exploration-seed-${seed}.svg`, {
                 strokeMin: 0.15,
                 strokeMax: 0.65,
                 opacityBase: 0.7
