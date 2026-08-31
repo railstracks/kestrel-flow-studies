@@ -129,7 +129,7 @@ function simulateCohorts(schedule, baseSeed, opts) {
         for (let i = 0; i < trailsPerCohort; i++) {
             let x = (rand() - 0.5) * 180;
             let y = (rand() - 0.5) * 180;
-            const opacity = (0.35 + rand() * 0.40) * (1.0 - 0.5 * tau); // late trails fade, readable floor
+            const opacity = (0.35 + rand() * 0.40) * (1.0 - 0.25 * tau); // v3: gentler fade — late trails must read THROUGH dense regions (W2 masking fix)
             const pts = [[x, y]];
             let prevHeading = null;
 
@@ -186,13 +186,13 @@ function lerpColor(A, B, t) {
     return rgbToHex(Math.round(lerp(A[0], B[0], t)), Math.round(lerp(A[1], B[1], t)), Math.round(lerp(A[2], B[2], t)));
 }
 const waneAnchors = { early: [212, 162, 78], late: [138, 148, 160] };   // saturated gold → cool smoke
-const waxAnchors  = { early: [42, 47, 82],  late: [223, 228, 236] };   // deep indigo → silver-white
+const waxAnchors  = { early: [165, 172, 185], late: [212, 162, 78] };   // v3: silver → warm brass (indigo died on the dark ground; alive=warm across the pair)
 
 function generateSVG(trails, anchors, bg, outputPath) {
     const lines = [];
     for (const t of trails) {
         const col = lerpColor(anchors.early, anchors.late, t.tau);
-        const width = 1.2 - 0.6 * t.tau; // strokes thin as time passes, floor 0.6
+        const width = 1.2 - 0.4 * t.tau; // v3: strokes thin as time passes, floor 0.8 (was 0.6 — raised for overlap legibility)
         const d = t.pts.map((p, i) => {
             const [sx, sy] = worldToSvg(p[0], p[1]);
             return (i === 0 ? 'M' : 'L') + sx.toFixed(1) + ' ' + sy.toFixed(1);
