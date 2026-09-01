@@ -242,3 +242,118 @@ function monotoneDescending(vals) {
     cohortStats.forEach(c => console.log('    τ=' + c.tau.toFixed(2), 'dEnd=' + c.meanDEnd.toFixed(1), 'meander=' + c.meanMeander.toFixed(2), 'turn=' + c.meanTurn.toFixed(3)));
     console.log('  inversions vs descending (pre-reg W3, allow ≤1):', monotoneDescending(dEnds));
 })();
+
+// ═══════════════════════════════════════════════════════════════
+// Study XXVIII — "Extinction Order" (Series VI study 4, Block 147)
+// Pre-reg: gallivanting/visual-studies/2026-09-01-extinction-order-prereg.md
+//
+// 4 foci, graded basin depth, per-focus death schedules s_i(τ)=exp(−k_i τ)
+// INSIDE the normalized focus sum (the channel the walker reads). Global
+// blend authority FIXED at w=0.75 — per-focus death is the only designed
+// temporal mechanism. Arms: ORDERED (k graded weak→deep) and SIMULTANEOUS
+// control (all k=2.5). E5 (observation-only): normalized sum ⇒ total
+// extinction reorganizes into a centroid ghost rather than weather.
+// ═══════════════════════════════════════════════════════════════
+
+const FOCI_EO = [
+    { x: -52, y:  38, g: 60, k: 1.47, label: 'deep' },
+    { x:  48, y:  32, g: 48, k: 1.97, label: 'mid' },
+    { x: -38, y: -46, g: 38, k: 2.95, label: 'midweak' },
+    { x:  42, y: -40, g: 30, k: 6.20, label: 'weakest' }
+];
+const EO_W = 0.75;
+const EO_CAPTURE_R = 22;
+
+function eoFocusVec(x, y, tau, foci) {
+    let fx = 0, fy = 0;
+    for (const f of foci) {
+        const s = Math.exp(-f.k * tau);
+        const dx = f.x - x, dy = f.y - y;
+        const r = Math.sqrt(dx*dx + dy*dy) + 2;
+        fx += s * ((dx / r) * f.g / r + (-dy / r) * f.g / (r * 2.5));
+        fy += s * ((dy / r) * f.g / r + ( dx / r) * f.g / (r * 2.5));
+    }
+    return { x: fx, y: fy };
+}
+
+function eoField(x, y, tau, foci) {
+    const f = eoFocusVec(x, y, tau, foci);
+    const a = ambientVec(x, y);
+    const fm = Math.hypot(f.x, f.y);
+    const am = Math.hypot(a.x, a.y) || 1;
+    if (fm < 1e-6) return { x: a.x / am, y: a.y / am }; // formal guard; never fires in practice (E5)
+    return {
+        x: (f.x / fm) * EO_W + (a.x / am) * (1 - EO_W) * 0.6,
+        y: (f.y / fm) * EO_W + (a.y / am) * (1 - EO_W) * 0.6
+    };
+}
+
+function simulateExtinction(foci, baseSeed) {
+    const cohorts = 12, trailsPerCohort = 140, trailLen = 70, stepSize = 1.6;
+    const allTrails = [];
+    const capture = foci.map(() => []);
+
+    for (let k = 0; k < cohorts; k++) {
+        const tau = (k + 0.5) / cohorts;
+        const rand = mulberry32(baseSeed + k * 7919);
+        const caps = foci.map(() => 0);
+        let nTrails = 0;
+        for (let i = 0; i < trailsPerCohort; i++) {
+            let x = (rand() - 0.5) * 180;
+            let y = (rand() - 0.5) * 180;
+            const opacity = (0.35 + rand() * 0.40) * (1.0 - 0.25 * tau);
+            const pts = [[x, y]];
+            for (let step = 0; step < trailLen; step++) {
+                if (Math.abs(x) > 95 || Math.abs(y) > 95) break;
+                const v = eoField(x, y, tau, foci);
+                const len = Math.hypot(v.x, v.y) || 1;
+                x += (v.x / len) * stepSize;
+                y += (v.y / len) * stepSize;
+                pts.push([x, y]);
+            }
+            if (pts.length > 3) {
+                nTrails++;
+                foci.forEach((f, fi) => {
+                    if (Math.hypot(f.x - x, f.y - y) < EO_CAPTURE_R) caps[fi]++;
+                });
+                allTrails.push({ pts, opacity, tau });
+            }
+        }
+        foci.forEach((f, fi) => { capture[fi][k] = nTrails ? caps[fi] / nTrails : 0; });
+    }
+    return { trails: allTrails, capture };
+}
+
+// Pre-reg metric: death cohort = first k with c_i(k) < 0.5·c_i(0);
+// sharpness = (first k < 0.2·base) − (first k < 0.5·base) + 1 cohorts.
+function eoDeathStats(capture) {
+    return capture.map(series => {
+        const base = series[0];
+        if (base <= 0.02) return { base, death: null, sharp: null, note: 'baseline ≤0.02 — unmeasurable' };
+        let half = null, fifth = null;
+        for (let k = 0; k < series.length; k++) {
+            if (half === null && series[k] < 0.5 * base) half = k;
+            if (fifth === null && series[k] < 0.2 * base) fifth = k;
+        }
+        return { base, death: half, sharp: (half !== null && fifth !== null) ? fifth - half + 1 : null };
+    });
+}
+
+function reportExtinction(name, foci, svgPath) {
+    const { trails, capture } = simulateExtinction(foci, 31415);
+    const out = generateSVG(trails, waneAnchors, '#101014', svgPath);
+    console.log('\n' + name + ' (seed 31415)');
+    console.log('  trails:', out.trails, 'bytes:', out.bytes);
+    console.log('  capture fraction c_i(k) — rows: foci (deep→weakest), cols: cohort 0..11');
+    foci.forEach((f, fi) => {
+        console.log('    ' + f.label.padEnd(8) + 'k=' + f.k.toFixed(2), capture[fi].map(c => c.toFixed(3)).join(' '));
+    });
+    const ds = eoDeathStats(capture);
+    ds.forEach((d, fi) => console.log('    ' + foci[fi].label.padEnd(8), 'deathCohort=' + (d.death === null ? 'n/a' : d.death), 'sharp=' + (d.sharp === null ? 'n/a' : d.sharp + 'coh'), 'base=' + d.base.toFixed(3), d.note || ''));
+    return { capture, ds };
+}
+
+(function studyExtinction() {
+    reportExtinction('Study XXVIII — Extinction Order (ORDERED arm)', FOCI_EO, 'study-xxviii-extinction-order.svg');
+    reportExtinction('Extinction SIMULTANEOUS control', FOCI_EO.map(f => ({ ...f, k: 2.5 })), 'extinction-simultaneous-control.svg');
+})();
