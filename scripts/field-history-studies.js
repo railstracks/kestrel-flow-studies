@@ -357,3 +357,82 @@ function reportExtinction(name, foci, svgPath) {
     reportExtinction('Study XXVIII — Extinction Order (ORDERED arm)', FOCI_EO, 'study-xxviii-extinction-order.svg');
     reportExtinction('Extinction SIMULTANEOUS control', FOCI_EO.map(f => ({ ...f, k: 2.5 })), 'extinction-simultaneous-control.svg');
 })();
+
+// ═══════════════════════════════════════════════════════════════
+// Study XXVIII v2 — "Extinction Order, ratio-law edition" (Block 150)
+// Pre-reg: gallivanting/visual-studies/2026-09-02-extinction-v2-prereg.md
+//
+// k re-derived from the ratio law (Δk = −ln(0.30)/τ̂ = 1.204/τ̂, the
+// law's first FORWARD test — v1's band was post-hoc). ARBITRARY arm
+// (reversed k assignment) replaces the unrenderable SIMULTANEOUS
+// control. E4 gauge witness: a common k-offset leaves every field
+// direction exactly invariant — Law 1 generalized (the substrate reads
+// only the projective class of the schedule vector).
+// ═══════════════════════════════════════════════════════════════
+
+const FOCI_EO2 = [
+    { x: -52, y:  38, g: 60, k: 1.00, label: 'deep' },      // dominant, immortal (gauge-fixed)
+    { x:  48, y:  32, g: 48, k: 3.19, label: 'mid' },        // τ̂ 0.55 → cohort ~6
+    { x: -38, y: -46, g: 38, k: 5.01, label: 'midweak' },    // τ̂ 0.30 → cohort ~3
+    { x:  42, y: -40, g: 30, k: 9.03, label: 'weakest' }     // τ̂ 0.15 → cohort ~1
+];
+const FOCI_EO_ARB = [                                        // same multiset, reversed
+    { x: -52, y:  38, g: 60, k: 9.03, label: 'deep' },
+    { x:  48, y:  32, g: 48, k: 5.01, label: 'mid' },
+    { x: -38, y: -46, g: 38, k: 3.19, label: 'midweak' },
+    { x:  42, y: -40, g: 30, k: 1.00, label: 'weakest' }     // immortal absorber
+];
+
+function eoGaugeWitness(foci) {
+    const shifted = foci.map(f => ({ ...f, k: f.k + 1.0 }));
+    const rand = mulberry32(4242);
+    let sum = 0, n = 0, max = 0;
+    for (let p = 0; p < 200; p++) {
+        const x = (rand() - 0.5) * 180, y = (rand() - 0.5) * 180;
+        for (let k = 0; k < 12; k++) {
+            const tau = (k + 0.5) / 12;
+            const a = eoField(x, y, tau, foci), b = eoField(x, y, tau, shifted);
+            const dot = Math.max(-1, Math.min(1, (a.x*b.x + a.y*b.y) /
+                (Math.hypot(a.x, a.y) * Math.hypot(b.x, b.y))));
+            const ang = Math.acos(dot);
+            sum += ang; n++; if (ang > max) max = ang;
+        }
+    }
+    return { mean: sum / n, max };
+}
+
+function reportExtinctionV2(name, foci, svgPath, immortalIdx) {
+    const { trails, capture } = simulateExtinction(foci, 31415);
+    const out = generateSVG(trails, waneAnchors, '#101014', svgPath);
+    console.log('\n' + name + ' (seed 31415)');
+    console.log('  trails:', out.trails, 'bytes:', out.bytes);
+    console.log('  capture c_i(k) — rows: foci, cols: cohort 0..11');
+    foci.forEach((f, fi) => {
+        console.log('    ' + f.label.padEnd(8) + 'k=' + f.k.toFixed(2) + ' g=' + f.g,
+            capture[fi].map(c => c.toFixed(3)).join(' '));
+    });
+    const ds = eoDeathStats(capture);
+    ds.forEach((d, fi) => console.log('    ' + foci[fi].label.padEnd(8),
+        'deathCohort=' + (d.death === null ? 'n/a (immortal?)' : d.death),
+        'sharp=' + (d.sharp === null ? 'n/a' : d.sharp + 'coh'),
+        'base=' + d.base.toFixed(3), d.note || ''));
+    const deaths = ds.map((d, fi) => fi === immortalIdx ? null : d.death).filter(d => d !== null);
+    const imm = capture[immortalIdx];
+    console.log('    immortal (' + foci[immortalIdx].label + ') capture:', imm.map(c => c.toFixed(3)).join(' '));
+    console.log('    competitor deaths at cohorts:', deaths.join(', ') || 'none');
+    deaths.forEach(dk => {
+        if (dk < 1) return;
+        const before = imm[dk - 1], after = imm[dk];
+        console.log('      step @cohort ' + dk + ': ' + before.toFixed(3) + ' -> ' +
+            after.toFixed(3) + (after > before ? '  RISE' : '  no-rise'));
+    });
+    return { capture, ds };
+}
+
+(function studyExtinctionV2() {
+    const gw = eoGaugeWitness(FOCI_EO2);
+    console.log('\n  E4 gauge witness (k+1.0 vs k, 200 pts x 12 tau): mean |dAngle| = ' +
+        gw.mean.toExponential(2) + ' rad, max = ' + gw.max.toExponential(2));
+    reportExtinctionV2('Study XXVIII v2 — ORDERED (ratio-law k)', FOCI_EO2, 'study-xxviii-extinction-order-v2.svg', 0);
+    reportExtinctionV2('Study XXVIII v2 — ARBITRARY (reversed assignment)', FOCI_EO_ARB, 'extinction-arbitrary-arm.svg', 3);
+})();
