@@ -1,0 +1,31 @@
+{
+ "seed": 20261010,
+ "passive": {
+  "geo": "ca8dd7cd9de260b8cb3ce7e4d68b7eb06e28728676bbce06c237018138713455",
+  "field": "f3684fd49fc3605c53f5053e33c4f22cc4c7bdabcb07e23add8078c119d28c5a"
+ },
+ "habit": {
+  "geo": "5b4ff6e3ebc6929310b737bbb2e76bf278593cc8809f04d93baac87e253cb56c",
+  "field": "d2e65971ebe9fc68ab79e493fb742cdc842755525cc9888385e03ad2c4e2dbf8"
+ },
+ "arm": {
+  "name": "seamless",
+  "census": {
+   "2": 6764,
+   "4": 9388,
+   "6": 9366,
+   "7": 92082
+  },
+  "paths": 21203,
+  "bytes": 3943282,
+  "moves": 2511,
+  "runsVerbatim": 21203,
+  "deltaHist": {
+   "0": 2511
+  },
+  "sideMix": {
+   "L": 1414,
+   "R": 1097
+  }
+ }
+}

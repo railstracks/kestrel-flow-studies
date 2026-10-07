@@ -1,0 +1,12 @@
+{
+ "seed": 20261010,
+ "sides": {
+  "L": 1414,
+  "R": 1097
+ },
+ "deltaHist": {
+  "0": 2511
+ },
+ "runsVerbatim": 21203,
+ "runsFinal": 21203
+}
